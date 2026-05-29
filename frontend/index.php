@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require_once './libs/router.php';
 require_once './auth_controller.php';
+require_once './ProdutoController.php';
+
 
 $router = new Router(__DIR__);
 
@@ -119,7 +121,15 @@ $router->get('/ordem-servico', function () {
     serve_protected_page('/pages/ordem-servico/', __DIR__ . '/pages/ordem-servico/automax-os.html');
 });
 
-// ── Placeholders ──────────────────────────────────────────────────────────
+ 
+/*
+ * GET /api/produto?id=:id
+ * Retorna JSON com { produto, relacionados }.
+ * O produto.js consome este endpoint ao carregar /produto/:id.
+ */
+$router->get('/api/produto', function () {
+    include __DIR__ . '/api/produto.php';
+});
 
 foreach (['/servicos', '/pedir', '/cadastro', '/busca'] as $rota) {
     $router->get($rota, function () use ($rota) {
