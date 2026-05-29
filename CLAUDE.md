@@ -47,6 +47,7 @@ Um ano depois, voltamos diferentes. Voltamos com a Flowgate (ainda atuando como 
 
 
 Quando for construir uma página web do projeto, você precisa seguir a seguinte palheta e ídeia de estilo:
+```
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap');
 
 :root {
@@ -94,5 +95,5 @@ Quando for construir uma página web do projeto, você precisa seguir a seguinte
   --transition:    0.26s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.45s cubic-bezier(0.23, 1, 0.32, 1);
 }
-
+```
 Qualquer coisa peça pelo código html da página homepage para ver o design, mas peça o zip do projeto se necessário.
