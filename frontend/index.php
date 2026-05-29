@@ -5,6 +5,8 @@ declare(strict_types=1);
 require_once './libs/router.php';
 require_once './libs/AccessControl.php';
 require_once './auth_controller.php';
+require_once './ProdutoController.php';
+require_once './cadastro_controller.php';
 
 $router = new Router(__DIR__);
 
@@ -140,8 +142,26 @@ $router->get('/ordem-servico', function () {
 // });
 
 // ── Placeholders ──────────────────────────────────────────────────────────
+ 
+/*
+ * GET /api/produto?id=:id
+ * Retorna JSON com { produto, relacionados }.
+ * O produto.js consome este endpoint ao carregar /produto/:id.
+ */
+$router->get('/api/produto', function () {
+    include __DIR__ . '/api/produto.php';
+});
+// ── Rotas de cadastro de cliente ─────────────────────────────────────────
 
-foreach (['/servicos', '/pedir', '/cadastro', '/busca'] as $rota) {
+$router->get('/cadastro', function () {
+    CadastroController::handle_page();
+});
+
+$router->post('/cadastro/criar', function () {
+    CadastroController::handle_criar();
+});
+
+foreach (['/servicos', '/pedir', '/busca'] as $rota) {
     $router->get($rota, function () use ($rota) {
         http_response_code(200);
         header('Content-Type: text/html; charset=UTF-8');
