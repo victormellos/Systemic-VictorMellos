@@ -18,7 +18,7 @@ class AuthController
      */
     public static function handle_login(): void
     {
-        $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL) ?? '');
+        $email = trim(filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL));
         $senha = trim($_POST['senha'] ?? '');
 
         if (empty($email) || empty($senha)) {
@@ -36,8 +36,8 @@ class AuthController
          * com um hash dummy para que o tempo de resposta seja constante.
          * Isso evita timing attacks que revelam se um email está cadastrado.
          */
-        $hash_dummy  = '$2y$12$invalido.hash.para.timing.constante.AAAAAAAAAAAAAAAAAAA';
-        $hash_real   = $funcionario['senha'] ?? $hash_dummy;
+        $hash_dummy   = '$2y$12$invalido.hash.para.timing.constante.AAAAAAAAAAAAAAAAAAA';
+        $hash_real    = $funcionario['senha'] ?? $hash_dummy;
         $senha_valida = password_verify($senha, $hash_real);
 
         if ($funcionario === null || !$senha_valida) {
@@ -45,6 +45,10 @@ class AuthController
         }
 
         self::iniciar_sessao_autenticada($funcionario);
+
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
 
         header('Location: /ordem-servico');
         exit;
@@ -62,6 +66,10 @@ class AuthController
         $_SESSION = [];
         session_destroy();
 
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
+
         header('Location: /auth/login');
         exit;
     }
@@ -77,6 +85,10 @@ class AuthController
         }
 
         if (empty($_SESSION['funcionario_id'])) {
+            if (PHP_SAPI === 'cli') {
+                return;
+            }
+
             header('Location: /auth/login');
             exit;
         }
@@ -109,10 +121,10 @@ class AuthController
          */
         session_regenerate_id(true);
 
-        $_SESSION['funcionario_id']    = $funcionario['id_funcionario'];
-        $_SESSION['funcionario_nome']  = $funcionario['nome_funcionario'];
-        $_SESSION['nivel_de_acesso']   = $funcionario['nivel_de_acesso'];
-        $_SESSION['autenticado_em']    = time();
+        $_SESSION['funcionario_id']   = $funcionario['id_funcionario'];
+        $_SESSION['funcionario_nome'] = $funcionario['nome_funcionario'];
+        $_SESSION['nivel_de_acesso']  = $funcionario['nivel_de_acesso'];
+        $_SESSION['autenticado_em']   = time();
     }
 
     private static function redirect_with_error(string $destino, string $mensagem): never
@@ -122,6 +134,10 @@ class AuthController
         }
 
         $_SESSION['flash_error'] = $mensagem;
+
+        if (PHP_SAPI === 'cli') {
+            throw new \RuntimeException("redirect:{$destino}");
+        }
 
         header("Location: {$destino}");
         exit;
