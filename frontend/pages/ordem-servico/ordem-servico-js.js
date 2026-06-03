@@ -358,6 +358,7 @@ function abrirNova() {
   document.getElementById('oOrc').value = '';
   const hoje = new Date().toISOString().split('T')[0];
   document.getElementById('oAb').value  = hoje;
+  document.getElementById('oAb').max    = hoje;
   document.getElementById('oPr').value  = '';
   document.getElementById('oPr').min    = hoje;
   document.getElementById('oFech').value = '';
@@ -388,6 +389,7 @@ function editarOS(id) {
   popVeic(o.id_veiculo);
   document.getElementById('oTipo').value  = o.tipo_ordem;
   document.getElementById('oAb').value    = o.abertura || '';
+  document.getElementById('oAb').max      = new Date().toISOString().split('T')[0];
   document.getElementById('oPr').value    = o.prazo    || '';
   document.getElementById('oDiag').value  = o.diagnostico || '';
   document.getElementById('oMO').value    = o.mao_de_obra  || '';
@@ -423,6 +425,9 @@ function salvarOS() {
   if (errs.length) { showVali(`Preencha: ${errs.join(', ')}.`); return; }
 
   const hoje = new Date().toISOString().split('T')[0];
+  if (ab > hoje) {
+    showVali('A data de abertura não pode ser uma data futura.'); return;
+  }
   if (!editId && pr < hoje) {
     showVali('O prazo previsto não pode ser uma data passada.'); return;
   }
@@ -787,7 +792,9 @@ function fc(v) {
 ═══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   init_user_display();
-  document.getElementById('oAb').value = new Date().toISOString().split('T')[0];
+  const hoje = new Date().toISOString().split('T')[0];
+  document.getElementById('oAb').value = hoje;
+  document.getElementById('oAb').max   = hoje;
   renderTbl();
 });
 /* ═══════════════════════════════════════════════
