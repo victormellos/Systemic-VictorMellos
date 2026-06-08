@@ -101,3 +101,6 @@ Qualquer coisa peça pelo código html da página homepage para ver o design, ma
 
 Ao criar diretórios, não utilize {} em comandos como o mkdir, pois eles quebram.
 Exemplo: ``mkdir -p {algo}`` ou qualquer coisa com {} para representar multiplos diretórios
+
+
+Não use comentários gigantes com separadores no estilo "--------------------"
