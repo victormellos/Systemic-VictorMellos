@@ -1,12 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use Automax\Controllers\AuthController;
 use Automax\Controllers\ProdutoController;
 use Automax\Controllers\ProdutoNotFoundException;
-use Automax\Config\DatabaseException;
 
-declare(strict_types=1);
 
 use Automax\Controllers\AuthController;
 use Automax\Config\Database;
