@@ -169,13 +169,17 @@ $router->post('/cadastro/criar', function () {
     CadastroController::handle_criar();
 });
 
-foreach (['/servicos', '/pedir'] as $rota) {
-    $router->get($rota, function () use ($rota) {
-        http_response_code(200);
-        header('Content-Type: text/html; charset=UTF-8');
-        echo "<h2 style='font-family:sans-serif;padding:2rem'>PÃƒÆ’Ã‚Â¡gina <code>{$rota}</code> em construÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o.</h2>";
-    });
-}
+$router->get('/servicos', function () {
+    serve_page('/pages/servicos/', __DIR__ . '/pages/servicos/servicos.html');
+});
+
+$router->get('/pedir', function () {
+    serve_page('/pages/pedir/', __DIR__ . '/pages/pedir/pedir.html');
+});
+
+$router->post('/api/agendamento', function () {
+    include __DIR__ . '/api/agendamento.php';
+});
 
 $router->get('/busca', function () {
     serve_page('/pages/busca/', __DIR__ . '/pages/busca/busca.html');
@@ -193,4 +197,3 @@ try {
     http_response_code(500);
     echo $e->getMessage();
 }
-
