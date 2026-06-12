@@ -43,6 +43,61 @@ Um ano depois, voltamos diferentes. Voltamos com a Flowgate (ainda atuando como 
                     +-----------------------------+
 
 
+
+Systemic/
+├── backend/
+│   └── Banco_de_Dados/
+│       ├── oficina_db_mariadb.sql   # Schema do banco da Automax
+│       ├── seed_funcionarios.sql    # Dados iniciais de funcionários
+│       └── flowgate_init.sql        # Criação do usuário flowgate no MariaDB
+├── flowgate/                        # API da Flowgate (porta 8081)
+│   ├── api/
+│   │   ├── categorias.php
+│   │   ├── disponibilidade.php
+│   │   ├── fornecedoras.php
+│   │   ├── peca.php
+│   │   └── pecas.php
+│   ├── docs/
+│   │   ├── API.md                   # Documentação completa da API
+│   │   └── flowgate_db.sql          # Schema do banco da Flowgate
+│   ├── libs/
+│   │   ├── ApiAuth.php              # Autenticação por API key (hash SHA-256)
+│   │   └── router.php
+│   ├── database.php
+│   └── index.php                    # Entry point da Flowgate
+├── frontend/                        # App da Automax (porta 8080)
+│   ├── api/
+│   │   ├── busca.php                # GET /api/busca
+│   │   ├── produto.php              # GET /api/produto
+│   │   └── produtos.php             # GET /api/produtos
+│   ├── app/                         # Classes PHP com autoload PSR-4
+│   │   ├── Auth/
+│   │   │   └── AccessControl.php
+│   │   ├── Config/
+│   │   │   └── Database.php
+│   │   ├── Controllers/
+│   │   │   ├── AuthController.php
+│   │   │   ├── CadastroController.php
+│   │   │   └── ProdutoController.php
+│   │   └── Http/
+│   │       └── Router.php
+│   ├── pages/
+│   │   ├── busca/
+│   │   ├── cadastro/
+│   │   ├── errors/
+│   │   ├── homepage/
+│   │   ├── login/
+│   │   ├── ordem-servico/
+│   │   ├── produto/
+│   │   └── produtos/
+│   ├── styles/
+│   └── index.php                    # Entry point da Automax
+├── tests/                           # Testes PHPUnit
+├── apache.conf                      # Configuração dos Virtual Hosts
+├── composer.json
+├── docker-compose.yml
+└── Dockerfile
+
 ```
 
 
