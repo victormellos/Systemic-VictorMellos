@@ -6,7 +6,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Automax\\": "automax/app/"
+            "Automax\\": "frontend/app/"
         }
     },
     "autoload-dev": {
