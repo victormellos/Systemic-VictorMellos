@@ -622,15 +622,12 @@ img {
   width: 100%;
   max-width: 440px;
   transform: perspective(900px) rotateX(6deg) rotateY(-14deg) rotateZ(2deg);
-  transition: transform var(--transition-slow);
+  transition: transform 0.15s ease-out;
   filter: drop-shadow(0 24px 48px rgba(0,0,0,0.7)) drop-shadow(0 0 40px var(--red-glow));
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--border-accent);
   cursor: default;
-}
-.hero-card-3d:hover {
-  transform: perspective(900px) rotateX(2deg) rotateY(-4deg) rotateZ(0deg);
 }
 .hero-card-3d img {
   width: 100%;
@@ -638,7 +635,9 @@ img {
   display: block;
 }
 
-
+.hero-card-3d:hover {
+  transform: perspective(900px) rotateX(2deg) rotateY(-4deg) rotateZ(0deg);
+}
 
 
 .hero-marquee-wrap {

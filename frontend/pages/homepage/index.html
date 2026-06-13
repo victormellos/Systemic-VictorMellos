@@ -133,7 +133,7 @@
             </div>
           </div>
           <div class="col-lg-5 d-none d-lg-flex justify-content-center">
-            <div class="hero-card-3d" aria-hidden="true">
+            <div class="hero-card-3d" aria-hidden="true" id="heroCard">
               <img src="../../assets/ad.png" alt="Advertisement" role="presentation" width="480" height="520">
             </div>
           </div>
@@ -585,6 +585,19 @@
       });
       isoCard.addEventListener('mouseleave', () => {
         isoCard.style.transform = 'perspective(600px) rotateX(8deg) rotateY(-12deg) rotateZ(2deg)';
+      });
+    }
+
+    const heroCard = document.getElementById('heroCard');
+    if (heroCard) {
+      heroCard.addEventListener('mousemove', e => {
+        const r = heroCard.getBoundingClientRect();
+        const x = ((e.clientX - r.left) / r.width - 0.5) * 22;
+        const y = ((e.clientY - r.top) / r.height - 0.5) * -22;
+        heroCard.style.transform = `perspective(900px) rotateX(${y}deg) rotateY(${x}deg) rotateZ(2deg)`;
+      });
+      heroCard.addEventListener('mouseleave', () => {
+        heroCard.style.transform = 'perspective(900px) rotateX(6deg) rotateY(-14deg) rotateZ(2deg)';
       });
     }
   </script>
