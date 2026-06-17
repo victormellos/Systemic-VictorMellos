@@ -25,19 +25,49 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('veiculoPlaca').addEventListener('input', function () {
         this.value = this.value.toUpperCase();
     });
+
+    /* Fecha modal ao clicar no X, em "Cancelar", ou fora da caixa */
+    document.querySelectorAll('[data-close-modal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            fechar_modal(this.dataset.closeModal);
+        });
+    });
+
+    document.querySelectorAll('.painel-modal-overlay').forEach(function (overlay) {
+        overlay.addEventListener('click', function (evento) {
+            if (evento.target === overlay) fechar_modal(overlay.id);
+        });
+    });
+
+    document.addEventListener('keydown', function (evento) {
+        if (evento.key === 'Escape') {
+            document.querySelectorAll('.painel-modal-overlay:not([hidden])').forEach(function (overlay) {
+                fechar_modal(overlay.id);
+            });
+        }
+    });
 });
+
+function abrir_modal(id) {
+    document.getElementById(id).hidden = false;
+}
+
+function fechar_modal(id) {
+    document.getElementById(id).hidden = true;
+}
 
 function inject_csrf_logout() {
     const token = window.__session_user?.csrf_token ?? '';
-    const input = document.getElementById('csrfLogout');
-    if (input) input.value = token;
+    document.querySelectorAll('#csrfLogout, .csrf-logout-input').forEach(function (input) {
+        input.value = token;
+    });
 }
 
 function init_boas_vindas() {
     const nome = window.__session_user?.nome ?? '';
     const el = document.getElementById('boasVindas');
     if (el && nome) {
-        el.textContent = `Bem-vindo(a) de volta, ${nome.split(' ')[0]}.`;
+        el.textContent = `Bem-vindo(a) de volta, ${nome.split(' ')[0]}. Gerencie seus veículos e agendamentos.`;
     }
 }
 
@@ -68,7 +98,7 @@ async function carregar_veiculos() {
         const veiculos = await resposta.json();
         renderizar_veiculos(veiculos);
     } catch (erro) {
-        container.innerHTML = `<p class="estado-vazio text-danger">Não foi possível carregar seus veículos.</p>`;
+        container.innerHTML = `<p class="estado-vazio">Não foi possível carregar seus veículos.</p>`;
     }
 }
 
@@ -85,15 +115,15 @@ function renderizar_veiculos(veiculos) {
             <div class="veiculo-item" data-id="${v.id_veiculo}">
                 <div class="veiculo-info">
                     <strong>${escape_html(v.marca)} ${escape_html(v.modelo)}</strong>
-                    <div>${escape_html(v.cor)} · ${escape_html(v.ano)}</div>
+                    <div class="veiculo-sub">${escape_html(v.cor)} · ${escape_html(v.ano)}</div>
                     <span class="placa">${escape_html(v.placa)}</span>
                 </div>
                 <div class="veiculo-acoes">
-                    <button type="button" class="editar" title="Editar">
-                        <i class="fas fa-pen"></i>
+                    <button type="button" class="editar" title="Editar" aria-label="Editar veículo">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
                     </button>
-                    <button type="button" class="excluir" title="Remover">
-                        <i class="fas fa-trash"></i>
+                    <button type="button" class="excluir" title="Remover" aria-label="Remover veículo">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                     </button>
                 </div>
             </div>
@@ -107,7 +137,7 @@ function renderizar_veiculos(veiculos) {
         });
         item.querySelector('.excluir').addEventListener('click', function () {
             excluindoVeiculoId = id;
-            new bootstrap.Modal(document.getElementById('modalExcluir')).show();
+            abrir_modal('modalExcluir');
         });
     });
 }
@@ -117,7 +147,7 @@ function abrir_modal_novo_veiculo() {
     document.getElementById('modalVeiculoTitulo').textContent = 'Adicionar veículo';
     limpar_form_veiculo();
     esconder_erro_veiculo();
-    new bootstrap.Modal(document.getElementById('modalVeiculo')).show();
+    abrir_modal('modalVeiculo');
 }
 
 function abrir_modal_editar_veiculo(id, veiculo) {
@@ -132,7 +162,7 @@ function abrir_modal_editar_veiculo(id, veiculo) {
     document.getElementById('veiculoCor').value    = veiculo?.cor    ?? '';
     document.getElementById('veiculoPlaca').value  = veiculo?.placa  ?? '';
 
-    new bootstrap.Modal(document.getElementById('modalVeiculo')).show();
+    abrir_modal('modalVeiculo');
 }
 
 function limpar_form_veiculo() {
@@ -143,11 +173,14 @@ function limpar_form_veiculo() {
 function mostrar_erro_veiculo(mensagem) {
     const erro = document.getElementById('erroVeiculo');
     erro.textContent = mensagem;
-    erro.classList.remove('d-none');
+    erro.hidden = false;
+    erro.classList.add('visible');
 }
 
 function esconder_erro_veiculo() {
-    document.getElementById('erroVeiculo').classList.add('d-none');
+    const erro = document.getElementById('erroVeiculo');
+    erro.hidden = true;
+    erro.classList.remove('visible');
 }
 
 async function salvar_veiculo() {
@@ -180,7 +213,7 @@ async function salvar_veiculo() {
             return;
         }
 
-        bootstrap.Modal.getInstance(document.getElementById('modalVeiculo')).hide();
+        fechar_modal('modalVeiculo');
         carregar_veiculos();
     } catch (erro) {
         mostrar_erro_veiculo('Falha na conexão. Tente novamente.');
@@ -204,7 +237,7 @@ async function confirmar_exclusao_veiculo() {
 
         if (!resposta.ok) throw new Error('Falha ao remover.');
 
-        bootstrap.Modal.getInstance(document.getElementById('modalExcluir')).hide();
+        fechar_modal('modalExcluir');
         excluindoVeiculoId = null;
         carregar_veiculos();
     } catch (erro) {
@@ -228,7 +261,7 @@ async function carregar_agendamentos() {
         const agendamentos = await resposta.json();
         renderizar_agendamentos(agendamentos);
     } catch (erro) {
-        container.innerHTML = `<p class="estado-vazio text-danger">Não foi possível carregar seus agendamentos.</p>`;
+        container.innerHTML = `<p class="estado-vazio">Não foi possível carregar seus agendamentos.</p>`;
     }
 }
 
@@ -246,7 +279,7 @@ function renderizar_agendamentos(agendamentos) {
 
         return `
             <div class="agendamento-item">
-                <div class="d-flex justify-content-between align-items-start">
+                <div class="agendamento-top">
                     <span class="servico">${escape_html(a.servico)}</span>
                     <span class="status-badge ${status.classe}">${escape_html(status.texto)}</span>
                 </div>
