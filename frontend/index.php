@@ -14,6 +14,7 @@ use Automax\Controllers\EstoqueController;
 use Automax\Controllers\FuncionariosController;
 use Automax\Controllers\ClienteController;
 use Automax\Controllers\AgendamentoController;
+use Automax\Controllers\LogsController;
 use Automax\Controllers\ProdutoNotFoundException;
 use Automax\Config\DatabaseException;
 
@@ -160,6 +161,23 @@ $router->post('/auth/logout', function () {
     AuthController::handle_logout();
 });
 
+$router->get('/busca', function () {
+    serve_page('/pages/busca/', __DIR__ . '/pages/busca/busca.html');
+});
+
+$router->get('/servicos', function () {
+    serve_page('/pages/servicos/', __DIR__ . '/pages/servicos/servicos.html');
+});
+
+$router->get('/cadastro', function () {
+    CadastroController::handle_page();
+});
+
+$router->post('/cadastro/criar', function () {
+    AuthController::validate_csrf_token();
+    CadastroController::handle_criar();
+});
+
 // Rotas protegidas
 
 $router->get('/produtos', function () {
@@ -221,6 +239,16 @@ $router->get('/funcionarios', function () {
     serve_protected_page('/pages/funcionarios/', __DIR__ . '/pages/funcionarios/funcionarios.html');
 });
 
+$router->get('/painel', function () {
+    AccessControl::exigir_cliente();
+    serve_protected_page('/pages/painel/', __DIR__ . '/pages/painel/painel.html');
+});
+
+$router->get('/pedir', function () {
+    AccessControl::exigir_cliente();
+    serve_protected_page('/pages/pedir/', __DIR__ . '/pages/pedir/pedir.html');
+});
+
 // API de produtos
 
 $router->get('/api/produto', function () {
@@ -229,6 +257,10 @@ $router->get('/api/produto', function () {
 
 $router->get('/api/produtos', function () {
     include __DIR__ . '/api/produtos.php';
+});
+
+$router->get('/api/busca', function () {
+    include __DIR__ . '/api/busca.php';
 });
 
 // API de fornecedores
@@ -275,26 +307,14 @@ $router->delete('/api/estoque/:id', function (array $params) {
     EstoqueController::deletar($params);
 });
 
-// API de funcionarios
+// API de logs
 
-$router->get('/api/funcionarios', function () {
-    FuncionariosController::listar();
+$router->get('/api/logs', function () {
+    LogsController::listar();
 });
 
-$router->get('/api/funcionarios/:id', function (array $params) {
-    FuncionariosController::buscar($params);
-});
-
-$router->post('/api/funcionarios', function () {
-    FuncionariosController::criar();
-});
-
-$router->patch('/api/funcionarios/:id', function (array $params) {
-    FuncionariosController::atualizar($params);
-});
-
-$router->delete('/api/funcionarios/:id', function (array $params) {
-    FuncionariosController::deletar($params);
+$router->get('/api/logs/funcionarios', function () {
+    LogsController::funcionarios_ativos();
 });
 
 // API de funcionários
@@ -319,42 +339,7 @@ $router->delete('/api/funcionarios/:id', function (array $params) {
     FuncionariosController::deletar($params);
 });
 
-// API de logs
-
-$router->get('/api/logs', function () {
-    LogsController::listar();
-});
-
-$router->get('/api/logs/funcionarios', function () {
-    LogsController::funcionarios_ativos();
-});
-
-// Rotas de cadastro
-
-$router->get('/cadastro', function () {
-    CadastroController::handle_page();
-});
-
-$router->post('/cadastro/criar', function () {
-    AuthController::validate_csrf_token();
-    CadastroController::handle_criar();
-});
-
-// Área do cliente
-
-$router->get('/painel', function () {
-    AccessControl::exigir_cliente();
-    serve_protected_page('/pages/painel/', __DIR__ . '/pages/painel/painel.html');
-});
-
-$router->get('/servicos', function () {
-    serve_page('/pages/servicos/', __DIR__ . '/pages/servicos/servicos.html');
-});
-
-$router->get('/pedir', function () {
-    AccessControl::exigir_cliente();
-    serve_protected_page('/pages/pedir/', __DIR__ . '/pages/pedir/pedir.html');
-});
+// API de veículos e agendamentos (área do cliente)
 
 $router->get('/api/veiculos', function () {
     AccessControl::exigir_cliente();
@@ -425,14 +410,6 @@ $router->get('/uploads/avatars/:arquivo', function (array $params) {
     header('X-Content-Type-Options: nosniff');
     readfile($caminho);
     exit;
-});
-
-$router->get('/busca', function () {
-    serve_page('/pages/busca/', __DIR__ . '/pages/busca/busca.html');
-});
-
-$router->get('/api/busca', function () {
-    include __DIR__ . '/api/busca.php';
 });
 
 // Dispatch
