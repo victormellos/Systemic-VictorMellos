@@ -309,7 +309,7 @@ $router->delete('/api/estoque/:id', function (array $params) {
 
 // API de logs
 
-$router->get('/api/logs', function () {
+$router->get('/logs', function () {
     LogsController::listar();
 });
 
