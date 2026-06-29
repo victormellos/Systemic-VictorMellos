@@ -924,6 +924,16 @@ select.form-control option { background: var(--carbon-mid); }
 }
 .contact-card:hover { border-color: var(--border-accent); }
 
+a.contact-card {
+  text-decoration: none;
+  color: inherit;
+}
+
+.contact-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
 .contact-card-icon {
   width: 40px;
   height: 40px;
@@ -961,6 +971,7 @@ select.form-control option { background: var(--carbon-mid); }
   border-radius: var(--radius-md);
   padding: 1.25rem;
 }
+.horarios-card h3,
 .horarios-card h4 {
   font-family: var(--font-display);
   font-weight: 700;
