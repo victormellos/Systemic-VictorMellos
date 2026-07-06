@@ -1,15 +1,27 @@
-const user        = window.__session_user || {};
-const csrf        = user.csrf_token || '';
+/**
+ * estoque.js
+ *
+ * Responsabilidades:
+ *  1. Listar produtos com busca, filtro de categoria e paginação
+ *  2. Criar e editar produtos via modal
+ *  3. Ajustar estoque com botões +/-
+ *  4. Remover produto com confirmação
+ */
+
+const user       = window.__session_user || {};
+const csrf       = user.csrf_token || '';
 const pode_editar = (user.permissoes || []).includes('estoque.editar');
 
-let pagina_atual    = 1;
-let total_paginas   = 1;
+let pagina_atual   = 1;
+let total_paginas  = 1;
 let categoria_atual = '';
-let busca_atual     = '';
-let timeout_busca   = null;
-let id_excluindo    = null;
+let busca_atual    = '';
+let timeout_busca  = null;
+let id_excluindo   = null;
 
 let modalProd, modalExc;
+
+// Setup sidebar (igual ao fornecedores.html)
 
 function setupSidebar() {
     const av = document.getElementById('sbAv');
@@ -42,6 +54,8 @@ function closeSidebar() {
     document.getElementById('overlay').classList.remove('show');
 }
 
+// Toast (igual ao fornecedores.html)
+
 function toast(msg, tipo = 'ok') {
     const c = document.getElementById('toastC');
     const t = document.createElement('div');
@@ -72,6 +86,8 @@ function classe_stock(qtd) {
 function label_cat(cat) {
     return { pecas: 'Peças', fluidos: 'Fluidos', eletrico: 'Elétrico' }[cat] ?? cat;
 }
+
+// Carregamento
 
 async function carregarEstoque(pagina = 1) {
     pagina_atual = pagina;
@@ -184,6 +200,8 @@ function renderPaginacao(pagina, total) {
     container.appendChild(btn_prox);
 }
 
+// Ajuste rápido de stock
+
 async function ajustarStock(id_produto, delta) {
     try {
         const res   = await fetch(`/api/estoque/${id_produto}/stock`, {
@@ -207,32 +225,25 @@ async function ajustarStock(id_produto, delta) {
     }
 }
 
-function resetarModal() {
-    document.getElementById('produtoId').value      = '';
-    document.getElementById('inputNome').value      = '';
-    document.getElementById('inputCategoria').value = '';
-    document.getElementById('inputPreco').value     = '';
-    document.getElementById('inputStock').value     = '0';
-    document.getElementById('inputImagem').value    = '';
-    document.getElementById('imagemUrl').value      = '';
-    document.getElementById('inputDetalhes').value  = '';
-    document.getElementById('vMsg').classList.remove('show');
-
-    const preview = document.getElementById('previewImagem');
-    preview.src   = '';
-    preview.style.display = 'none';
-}
+// Modal criar / editar
 
 function abrirNovo() {
-    document.getElementById('mTit').textContent = 'Novo Produto';
-    resetarModal();
+    document.getElementById('mTit').textContent    = 'Novo Produto';
+    document.getElementById('produtoId').value     = '';
+    document.getElementById('inputNome').value     = '';
+    document.getElementById('inputCategoria').value = '';
+    document.getElementById('inputPreco').value    = '';
+    document.getElementById('inputStock').value    = '0';
+    document.getElementById('inputImagem').value   = '';
+    document.getElementById('inputDetalhes').value = '';
+    document.getElementById('vMsg').classList.remove('show');
     modalProd.show();
 }
 
 async function abrirEdicao(id_produto) {
     document.getElementById('mTit').textContent = 'Editar Produto';
-    resetarModal();
-    document.getElementById('produtoId').value = id_produto;
+    document.getElementById('produtoId').value  = id_produto;
+    document.getElementById('vMsg').classList.remove('show');
     modalProd.show();
 
     try {
@@ -245,14 +256,8 @@ async function abrirEdicao(id_produto) {
         document.getElementById('inputCategoria').value = dados.categoria  ?? '';
         document.getElementById('inputPreco').value     = dados.preco      ?? '';
         document.getElementById('inputStock').value     = dados.stock      ?? '0';
-        document.getElementById('imagemUrl').value      = dados.imagem     ?? '';
+        document.getElementById('inputImagem').value    = dados.imagem     ?? '';
         document.getElementById('inputDetalhes').value  = dados.detalhes   ?? '';
-
-        if (dados.imagem) {
-            const preview = document.getElementById('previewImagem');
-            preview.src   = dados.imagem;
-            preview.style.display = '';
-        }
 
     } catch (err) {
         document.getElementById('vTxt').textContent = err.message;
@@ -260,53 +265,23 @@ async function abrirEdicao(id_produto) {
     }
 }
 
-async function fazer_upload_imagem(arquivo) {
-    const form_data = new FormData();
-    form_data.append('imagem', arquivo);
-
-    const res   = await fetch('/api/estoque/imagem', {
-        method:      'POST',
-        credentials: 'same-origin',
-        headers:     { 'X-CSRF-Token': csrf },
-        body:        form_data,
-    });
-    const dados = await res.json();
-
-    if (!res.ok) throw new Error(dados.erro || 'Falha no upload da imagem.');
-    return dados.imagem_url;
-}
-
 async function salvarProduto() {
     const id      = document.getElementById('produtoId').value;
-    const arquivo = document.getElementById('inputImagem').files[0];
-    let imagem_url = document.getElementById('imagemUrl').value.trim();
+    const payload = {
+        nome:      document.getElementById('inputNome').value.trim(),
+        categoria: document.getElementById('inputCategoria').value,
+        preco:     parseFloat(document.getElementById('inputPreco').value),
+        stock:     parseInt(document.getElementById('inputStock').value, 10),
+        imagem:    document.getElementById('inputImagem').value.trim(),
+        detalhes:  document.getElementById('inputDetalhes').value.trim(),
+    };
 
     const btn = document.getElementById('btnSalvar');
     btn.disabled = true;
 
     try {
-        if (arquivo) {
-            imagem_url = await fazer_upload_imagem(arquivo);
-            document.getElementById('imagemUrl').value = imagem_url;
-        }
-
-        if (!imagem_url) {
-            document.getElementById('vTxt').textContent = 'Selecione uma imagem para o produto.';
-            document.getElementById('vMsg').classList.add('show');
-            return;
-        }
-
-        const payload = {
-            nome:      document.getElementById('inputNome').value.trim(),
-            categoria: document.getElementById('inputCategoria').value,
-            preco:     parseFloat(document.getElementById('inputPreco').value),
-            stock:     parseInt(document.getElementById('inputStock').value, 10),
-            imagem:    imagem_url,
-            detalhes:  document.getElementById('inputDetalhes').value.trim(),
-        };
-
         const res   = await fetch(id ? `/api/estoque/${id}` : '/api/estoque', {
-            method:      id ? 'PUT' : 'POST',
+            method:      id ? 'PATCH' : 'POST',
             credentials: 'same-origin',
             headers:     { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
             body:        JSON.stringify(payload),
@@ -326,6 +301,8 @@ async function salvarProduto() {
         btn.disabled = false;
     }
 }
+
+// Modal exclusão
 
 function confirmarDelete(id_produto, nome) {
     id_excluindo = id_produto;
@@ -358,6 +335,8 @@ async function executarDelete() {
     }
 }
 
+// Inicialização
+
 document.addEventListener('DOMContentLoaded', () => {
     setupSidebar();
     modalProd = new bootstrap.Modal(document.getElementById('mProd'));
@@ -369,15 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('btnConfirmarDelete').addEventListener('click', executarDelete);
-
-    document.getElementById('inputImagem').addEventListener('change', function () {
-        const arquivo = this.files[0];
-        if (!arquivo) return;
-
-        const preview = document.getElementById('previewImagem');
-        preview.src   = URL.createObjectURL(arquivo);
-        preview.style.display = '';
-    });
 
     document.getElementById('searchInput').addEventListener('input', e => {
         clearTimeout(timeout_busca);
