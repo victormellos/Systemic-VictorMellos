@@ -106,8 +106,10 @@ class LogsController
         $params = [];
 
         if ($busca !== '') {
-            $conds[]          = '(f.nome_funcionario LIKE :busca OR l.detalhe LIKE :busca)';
-            $params[':busca'] = '%' . $busca . '%';
+            $conds[]                = '(f.nome_funcionario LIKE :busca_nome OR l.detalhe LIKE :busca_detalhe)';
+            $termo_busca             = '%' . $busca . '%';
+            $params[':busca_nome']    = $termo_busca;
+            $params[':busca_detalhe'] = $termo_busca;
         }
 
         if ($funcionario !== null) {
