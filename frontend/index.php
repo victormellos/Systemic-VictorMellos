@@ -10,7 +10,8 @@ use Automax\Controllers\AuthController;
 use Automax\Controllers\CadastroController;
 use Automax\Controllers\ProdutoController;
 use Automax\Controllers\FornecedorController;
-use Automax\Controllers\EstoqueController;
+use Automax\Controllers\PecasController;
+use Automax\Controllers\ProdutoEstoqueController;
 use Automax\Controllers\FuncionariosController;
 use Automax\Controllers\ClienteController;
 use Automax\Controllers\ClienteGerenciaController;
@@ -355,34 +356,65 @@ $router->delete('/api/fornecedores/:id', function (array $params) {
     FornecedorController::deletar($params);
 });
 
-// API de estoque
+// API de estoque (peças — estoque técnico interno)
 
 $router->get('/api/estoque', function () {
-    EstoqueController::listar();
+    PecasController::listar();
 });
 
-$router->post('/api/estoque/imagem', function () {
-    EstoqueController::imagem_upload();
+$router->get('/api/estoque/busca', function () {
+    PecasController::buscar_rapido();
 });
 
 $router->get('/api/estoque/:id', function (array $params) {
-    EstoqueController::buscar($params);
+    PecasController::buscar($params);
 });
 
 $router->post('/api/estoque', function () {
-    EstoqueController::criar();
+    PecasController::criar();
 });
 
 $router->patch('/api/estoque/:id', function (array $params) {
-    EstoqueController::atualizar($params);
+    PecasController::atualizar($params);
 });
 
-$router->patch('/api/estoque/:id/stock', function (array $params) {
-    EstoqueController::ajustar_stock($params);
+$router->patch('/api/estoque/:id/quantidade', function (array $params) {
+    PecasController::ajustar_quantidade($params);
 });
 
 $router->delete('/api/estoque/:id', function (array $params) {
-    EstoqueController::deletar($params);
+    PecasController::deletar($params);
+});
+
+// API de produtos (vitrine — gerenciamento interno; distinto do
+// /api/produtos público de leitura registrado acima, que serve a loja)
+
+$router->get('/api/produtos-gerencia', function () {
+    ProdutoEstoqueController::listar();
+});
+
+$router->post('/api/produtos-gerencia/imagem', function () {
+    ProdutoEstoqueController::imagem_upload();
+});
+
+$router->get('/api/produtos-gerencia/:id', function (array $params) {
+    ProdutoEstoqueController::buscar($params);
+});
+
+$router->post('/api/produtos-gerencia', function () {
+    ProdutoEstoqueController::criar();
+});
+
+$router->patch('/api/produtos-gerencia/:id', function (array $params) {
+    ProdutoEstoqueController::atualizar($params);
+});
+
+$router->patch('/api/produtos-gerencia/:id/stock', function (array $params) {
+    ProdutoEstoqueController::ajustar_stock($params);
+});
+
+$router->delete('/api/produtos-gerencia/:id', function (array $params) {
+    ProdutoEstoqueController::deletar($params);
 });
 
 // API de logs
